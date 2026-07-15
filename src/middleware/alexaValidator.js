@@ -9,7 +9,7 @@ const certificateCache = new Map();
 export async function alexaRequestValidator(req, res, next) {
   try {
     // Em development, pular validação se for teste local
-    if (process.env.NODE_ENV === 'development' && req.headers.signature === 'local-signature-test') {
+    if (process.env.SKIP_ALEXA_VALIDATION === 'true') {
       logger.debug('Skipping Alexa validation in development mode');
       return next();
     }
