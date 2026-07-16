@@ -3,16 +3,23 @@ import logger from '../utils/logger.js';
 // Limite Alexa para fala (8000 caracteres)
 const MAX_SPEECH_LENGTH = 8000;
 
-export function buildAlexaResponse(speechText, cardTitle = null, cardContent = null, shouldEndSession = true) {
+export function buildAlexaResponse(
+  speechText,
+  cardTitle = null,
+  cardContent = null,
+  shouldEndSession = true,
+  useSSML = false,
+  sessionAttributes = {}
+) {
   const truncatedSpeech = truncateSpeech(speechText);
 
   const response = {
     version: '1.0',
-    sessionAttributes: {},
+    sessionAttributes: sessionAttributes,
     response: {
       outputSpeech: {
-        type: 'PlainText',
-        text: truncatedSpeech,
+        type: useSSML ? 'SSML' : 'PlainText',
+        text: useSSML ? `<speak>${truncatedSpeech}</speak>` : truncatedSpeech,
       },
       shouldEndSession: shouldEndSession,
     },
@@ -30,29 +37,34 @@ export function buildAlexaResponse(speechText, cardTitle = null, cardContent = n
   return response;
 }
 
-export function buildErrorResponse(errorMessage = 'I encountered an error. Please try again.') {
+export function buildErrorResponse(errorMessage = 'I encountered an error. Please try again.', sessionAttributes = {}) {
   logger.warn('Building error response', { message: errorMessage });
 
   return {
     version: '1.0',
-    sessionAttributes: {},
+    sessionAttributes: sessionAttributes,
     response: {
       outputSpeech: {
         type: 'PlainText',
         text: errorMessage,
+      },
+      card: {
+        type: 'Simple',
+        title: 'Error',
+        content: errorMessage,
       },
       shouldEndSession: true,
     },
   };
 }
 
-export function buildRepromptResponse(speechText, repromptText) {
+export function buildRepromptResponse(speechText, repromptText, sessionAttributes = {}) {
   const truncatedSpeech = truncateSpeech(speechText);
   const truncatedReprompt = truncateSpeech(repromptText);
 
   return {
     version: '1.0',
-    sessionAttributes: {},
+    sessionAttributes: sessionAttributes,
     response: {
       outputSpeech: {
         type: 'PlainText',
