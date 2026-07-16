@@ -45,7 +45,7 @@ router.post('/', async (req, res) => {
 
         if (!userInput) {
           logger.warn('GetAnswerIntent without user input', { userId: userIdHash });
-          return res.json(buildErrorResponse('Please ask me something'));
+          return res.json(buildErrorResponse('Please ask me something', req.body.session?.attributes || {}));
         }
 
         try {
@@ -88,7 +88,7 @@ router.post('/', async (req, res) => {
             errorMessage = 'Claude service is temporarily unavailable. Please try again later.';
           }
 
-          return res.json(buildErrorResponse(errorMessage));
+          return res.json(buildErrorResponse(errorMessage, req.body.session?.attributes || {}));
         }
       }
 
@@ -107,7 +107,7 @@ router.post('/', async (req, res) => {
       // Intent desconhecido
       logger.warn('Unknown intent', { intent: intentName, userId: userIdHash });
       return res.json(
-        buildErrorResponse('I did not understand that. Please try asking a question.')
+        buildErrorResponse('I did not understand that. Please try asking a question.', req.body.session?.attributes || {})
       );
     }
 
@@ -118,12 +118,12 @@ router.post('/', async (req, res) => {
         reason,
         userId: userIdHash,
       });
-      return res.json({ version: '1.0', response: {} });
+      return res.json({ version: '1.0', sessionAttributes: {}, response: {} });
     }
 
     // Tipo de request desconhecido
     logger.warn('Unknown request type', { type: requestType, userId: userIdHash });
-    return res.status(400).json(buildErrorResponse('Invalid request type'));
+    return res.status(400).json(buildErrorResponse('Invalid request type', req.body.session?.attributes || {}));
   } catch (error) {
     logger.error('Alexa intent handler unhandled error', {
       error: error.message,
