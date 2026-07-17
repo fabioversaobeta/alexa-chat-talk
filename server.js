@@ -7,6 +7,7 @@ import { alexaLimiterMemory } from './src/middleware/rateLimiter.js';
 import { alexaRequestValidator } from './src/middleware/alexaValidator.js';
 import { sanitizeAlexaInput } from './src/middleware/inputSanitizer.js';
 import { errorHandler } from './src/middleware/errorHandler.js';
+import { requestDebugLogger } from './src/middleware/requestDebugLogger.js';
 import alexaRoutes from './src/routes/alexa.js';
 import logger from './src/utils/logger.js';
 
@@ -22,6 +23,9 @@ setupCors(app);
 
 // Logging
 app.use(morgan('combined', { stream: { write: msg => logger.info(msg) } }));
+
+// Debug logger (opcional - habilitado via DEBUG_REQUESTS=true)
+app.use(requestDebugLogger);
 
 // Capture raw body ANTES de parsing (necessário para validação Alexa)
 app.use(express.raw({ type: 'application/json' }), (req, res, next) => {
