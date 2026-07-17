@@ -24,9 +24,6 @@ setupCors(app);
 // Logging
 app.use(morgan('combined', { stream: { write: msg => logger.info(msg) } }));
 
-// Debug logger (opcional - habilitado via DEBUG_REQUESTS=true)
-app.use(requestDebugLogger);
-
 // Capture raw body ANTES de parsing (necessário para validação Alexa)
 app.use(express.raw({ type: 'application/json' }), (req, res, next) => {
   if (req.method === 'POST' && req.is('json')) {
@@ -38,6 +35,9 @@ app.use(express.raw({ type: 'application/json' }), (req, res, next) => {
 
 // Parsed JSON
 app.use(express.json({ limit: '1mb' }));
+
+// Debug logger (opcional - habilitado via DEBUG_REQUESTS=true) - DEPOIS de parsing
+app.use(requestDebugLogger);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
